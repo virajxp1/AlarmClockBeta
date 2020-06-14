@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     PendingIntent pendingIntent;
     Calendar c;
     Intent intent;
+    TimePickerDialog picker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,50 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment timePicker = new TimePickerFragment();
-                timePicker.show(getSupportFragmentManager(), "Set Time");
+                c = Calendar.getInstance();
+                int hour = c.get(Calendar.HOUR_OF_DAY);
+                int minutes = c.get(Calendar.MINUTE);
+                // time picker dialog
+                picker = new TimePickerDialog(MainActivity.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                c.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                c.set(Calendar.MINUTE, minute);
+                                boolean isAM = true;
+
+                                if(!DateFormat.is24HourFormat(MainActivity.this))
+                                    if (hourOfDay == 0) {
+                                        hourOfDay = 12;
+                                    }
+                                if (hourOfDay > 12){
+                                    hourOfDay -= 12;
+                                    isAM = false;
+                                }
+                                if(minute<10){
+                                    if (isAM) {
+                                        updateText.setText("Alarm Set To " + hourOfDay + ":0" + minute + " AM");
+                                    } else {
+                                        updateText.setText("Alarm Set To " + hourOfDay + ":0" + minute + " PM");
+                                    }
+                                } else {
+                                    if (isAM) {
+                                        updateText.setText("Alarm Set To " + hourOfDay + ":" + minute + " AM");
+                                    } else {
+                                        updateText.setText("Alarm Set To " + hourOfDay + ":" + minute + " PM");
+                                    }
+                                }
+
+                                intent.putExtra("extra", "on");
+
+                                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0,
+                                        intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+                            }
+                        }, hour, minutes, false);
+                picker.show();
+
             }
         });
 
@@ -73,46 +116,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     private void set_text(String txt){
         updateText.setText(txt);
-    }
-
-    @Override
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        this.hour = hourOfDay;
-        this.minutes = minute;
-
-        boolean isAM = true;
-
-        if(!DateFormat.is24HourFormat(this))
-            if (hourOfDay == 0) {
-                hourOfDay = 12;
-            }
-            if (hourOfDay > 12){
-                hourOfDay -= 12;
-                isAM = false;
-            }
-        if(minute<10){
-            if (isAM) {
-                updateText.setText("Alarm Set To " + hourOfDay + ":0" + minute + " AM");
-            } else {
-                updateText.setText("Alarm Set To " + hourOfDay + ":0" + minute + " PM");
-            }
-        } else {
-            if (isAM) {
-                updateText.setText("Alarm Set To " + hourOfDay + ":" + minute + " AM");
-            } else {
-                updateText.setText("Alarm Set To " + hourOfDay + ":" + minute + " PM");
-            }
-        }
-
-
-        c = Calendar.getInstance();
-
-        intent.putExtra("extra", "on");
-
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
     }
 
     @Override
@@ -136,4 +139,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {}
 }
