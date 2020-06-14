@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:backgroundTint="@android:color/background_dark"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -12,11 +14,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="11dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginBottom="39dp"
+        android:backgroundTint="#FFFFFF"
         android:src="@drawable/ic_baseline_add_24"
-        />
+        android:tint="@color/design_default_color_primary_dark" />
 
     <TextView
         android:id="@+id/textview_first"
@@ -24,6 +26,17 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="@string/select_time"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/end_alarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="120dp"
+        android:layout_marginBottom="203dp"
+        android:backgroundTint="@color/design_default_color_primary_dark"
+        android:text="@string/silence_please" />
 
 </RelativeLayout>

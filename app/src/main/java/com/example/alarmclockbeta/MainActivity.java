@@ -1,6 +1,10 @@
 package com.example.alarmclockbeta;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -14,21 +18,37 @@ import android.view.View;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.text.format.DateFormat;
+
+import org.w3c.dom.Text;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity implements TimePickerDialog.OnTimeSetListener {
 
     private int hour;
     private int minutes;
+    AlarmManager alarmManager;
+    TimePicker timePicker;
+    TextView updateText;
+    Context context;
+    PendingIntent pendingIntent;
+    Calendar c;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+        this.context = this;
+
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        updateText = (TextView) findViewById(R.id.textview_first);
+        intent = new Intent(this.context, AlarmReceiver.class);
 
         FloatingActionButton fab = findViewById(R.id.NewAlarm);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -38,19 +58,61 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                 timePicker.show(getSupportFragmentManager(), "Set Time");
             }
         });
+
+        Button endAlarm = (Button) findViewById(R.id.end_alarm);
+        endAlarm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alarmManager.cancel(pendingIntent);
+                set_text("Alarm Off. Set Time");
+                intent.putExtra("extra", "off");
+                sendBroadcast(intent);
+            }
+        });
+    }
+
+    private void set_text(String txt){
+        updateText.setText(txt);
     }
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         this.hour = hourOfDay;
         this.minutes = minute;
-        TextView t = findViewById(R.id.textview_first);
+
+        boolean isAM = true;
+
         if(!DateFormat.is24HourFormat(this))
-            hourOfDay-=12;
-        if(minute<10)
-            t.setText("Time " + hourOfDay + ":0" + minute);
-        else
-            t.setText("Time " + hourOfDay + ":" + minute);
+            if (hourOfDay == 0) {
+                hourOfDay = 12;
+            }
+            if (hourOfDay > 12){
+                hourOfDay -= 12;
+                isAM = false;
+            }
+        if(minute<10){
+            if (isAM) {
+                updateText.setText("Alarm Set To " + hourOfDay + ":0" + minute + " AM");
+            } else {
+                updateText.setText("Alarm Set To " + hourOfDay + ":0" + minute + " PM");
+            }
+        } else {
+            if (isAM) {
+                updateText.setText("Alarm Set To " + hourOfDay + ":" + minute + " AM");
+            } else {
+                updateText.setText("Alarm Set To " + hourOfDay + ":" + minute + " PM");
+            }
+        }
+
+
+        c = Calendar.getInstance();
+
+        intent.putExtra("extra", "on");
+
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
     }
 
     @Override
