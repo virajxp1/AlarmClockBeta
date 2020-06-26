@@ -39,4 +39,12 @@
         android:backgroundTint="@color/design_default_color_primary_dark"
         android:text="@string/silence_please" />
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="196dp"
+        android:layout_height="226dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="66dp" />
+
 </RelativeLayout>

@@ -1,10 +1,15 @@
 package com.example.alarmclockbeta;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -12,20 +17,29 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.text.format.DateFormat;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class MainActivity extends AppCompatActivity implements TimePickerDialog.OnTimeSetListener {
 
@@ -39,14 +53,19 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     Calendar c;
     Intent intent;
     TimePickerDialog picker;
+    String pathtofile;
+    ImageView imageview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        this.context = this;
+        if(Build.VERSION.SDK_INT>=23){
+            requestPermissions(new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
+        }
 
+        this.context = this;
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         updateText = (TextView) findViewById(R.id.textview_first);
         intent = new Intent(this.context, AlarmReceiver.class);
@@ -106,12 +125,46 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         endAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try{
+                    Intent camera = new Intent();
+                    camera.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                    if(camera.resolveActivity(getPackageManager()) != null){
+                        File photofile = null;
+                        File image = null;
+                        String name = new SimpleDateFormat("yyyMMdd_HHmmss").format(new Date());
+                        File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                        try{
+                            image = File.createTempFile(name,".jpg",storageDir);
+                        }catch (Exception e){e.printStackTrace();}
+                        photofile = image;
+                        if(photofile != null){
+                            pathtofile = photofile.getAbsolutePath();
+                            Uri photoURI = FileProvider.getUriForFile(MainActivity.this,"com.example.alarmclockbeta.fileprovier",photofile);
+                            camera.putExtra(MediaStore.EXTRA_OUTPUT,photoURI);
+                            startActivityForResult(camera,1);
+                        }
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
+                };
                 alarmManager.cancel(pendingIntent);
                 set_text("Alarm Off. Set Time");
                 intent.putExtra("extra", "off");
                 sendBroadcast(intent);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode,resultCode,data);
+        if(resultCode == RESULT_OK){
+            if(requestCode == 1){
+                Bitmap bitmap = BitmapFactory.decodeFile(pathtofile);
+                imageview = findViewById(R.id.imageView);
+                imageview.setImageBitmap(bitmap);
+            }
+        }
     }
 
     private void set_text(String txt){
