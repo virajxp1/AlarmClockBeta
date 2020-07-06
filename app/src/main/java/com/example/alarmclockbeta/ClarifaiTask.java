@@ -27,7 +27,7 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
     PendingIntent pendingIntent;
     Intent intent;
     MainActivity mainActivity;
-    String object = "keyboard";
+    String object = "book";
 
     public ClarifaiTask(String p, TextView u, AlarmManager a, PendingIntent pi, Intent i, MainActivity m) {
         pathtofile = p;
