@@ -27,6 +27,7 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
     PendingIntent pendingIntent;
     Intent intent;
     MainActivity mainActivity;
+    String object = "keyboard";
 
     public ClarifaiTask(String p, TextView u, AlarmManager a, PendingIntent pi, Intent i, MainActivity m) {
         pathtofile = p;
@@ -51,7 +52,7 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
             // Check if Clarifai thinks the photo contains the object we are looking for
             for (ClarifaiOutput<Concept> result : predictionResults)
                 for (Concept datum : result.data())
-                    if (datum.name().contains("phone".toLowerCase()))
+                    if (datum.name().contains(object.toLowerCase()))
                         return true;
         }
         return false;
@@ -61,10 +62,10 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
         if (aBoolean){
-            updateText.setText("Alarm Off. Set Time");
+            updateText.setText("Alarm Off. Set Time (+)");
             mainActivity.onRestart(true);
         } else {
-            updateText.setText("Try Again!");
+            updateText.setText("Try Again! No " + object + " found");
         }
     }
 

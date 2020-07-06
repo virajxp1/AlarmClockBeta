@@ -45,6 +45,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
@@ -85,14 +86,23 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
             public void onClick(View v) {
                 c = Calendar.getInstance();
                 int hour = c.get(Calendar.HOUR_OF_DAY);
-                int minutes = c.get(Calendar.MINUTE);
+                final int minutes = c.get(Calendar.MINUTE);
                 // time picker dialog
                 picker = new TimePickerDialog(MainActivity.this,
                         new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                Calendar cur_cal = new GregorianCalendar();
+                                cur_cal.setTimeInMillis(System.currentTimeMillis());
+                                if (cur_cal.get(Calendar.HOUR_OF_DAY) > hourOfDay)
+                                    c.set(Calendar.DAY_OF_YEAR, Calendar.DAY_OF_YEAR+1);
+                                else if (cur_cal.get(Calendar.HOUR_OF_DAY) == hourOfDay && cur_cal.get(Calendar.MINUTE)> minute)
+                                    c.set(Calendar.DAY_OF_YEAR, Calendar.DAY_OF_YEAR+1);
+
                                 c.set(Calendar.HOUR_OF_DAY, hourOfDay);
                                 c.set(Calendar.MINUTE, minute);
+                                c.set(Calendar.SECOND, 0);
+                                c.set(Calendar.MILLISECOND, 0);
                                 boolean isAM = true;
 
                                 if(!DateFormat.is24HourFormat(MainActivity.this))
@@ -123,7 +133,10 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                                         MainActivity.this, 0,
                                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(),
+                                Date yeet1 = c.getTime();
+                                Date yeet2 = cur_cal.getTime();
+
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTime().getTime(),
                                         pendingIntent);
                             }
                         }, hour, minutes, false);
@@ -168,9 +181,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         super.onActivityResult(requestCode,resultCode,data);
         if(resultCode == RESULT_OK){
             if(requestCode == 1){
-                Bitmap bitmap = BitmapFactory.decodeFile(pathtofile);
-                imageview = findViewById(R.id.imageView);
-                imageview.setImageBitmap(bitmap);
                 set_text("Processing...");
             }
         }
