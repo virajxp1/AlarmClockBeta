@@ -72,13 +72,14 @@ public class RingtonePlayingService extends Service {
         return START_NOT_STICKY;
     }
 
+
+
     @Override
     public void onDestroy() {
         // Tell the user we stopped.
         super.onDestroy();
         this.musicPlaying = false;
     }
-
 
 
 }

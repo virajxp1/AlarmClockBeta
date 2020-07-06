@@ -9,8 +9,15 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
+import clarifai2.api.ClarifaiBuilder;
+import clarifai2.api.ClarifaiClient;
+import clarifai2.dto.input.ClarifaiInput;
+import clarifai2.dto.model.output.ClarifaiOutput;
+import clarifai2.dto.prediction.Concept;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -38,6 +45,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static android.os.Environment.getExternalStoragePublicDirectory;
 
@@ -62,7 +70,8 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         setContentView(R.layout.activity_main);
 
         if(Build.VERSION.SDK_INT>=23){
-            requestPermissions(new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
+            requestPermissions(new String[]{Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
         }
 
         this.context = this;
@@ -110,10 +119,12 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
                                 intent.putExtra("extra", "on");
 
-                                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0,
+                                pendingIntent = PendingIntent.getBroadcast(
+                                        MainActivity.this, 0,
                                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(),
+                                        pendingIntent);
                             }
                         }, hour, minutes, false);
                 picker.show();
@@ -125,32 +136,29 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         endAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
-                    Intent camera = new Intent();
-                    camera.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-                    if(camera.resolveActivity(getPackageManager()) != null){
-                        File photofile = null;
-                        File image = null;
-                        String name = new SimpleDateFormat("yyyMMdd_HHmmss").format(new Date());
-                        File storageDir = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                        try{
-                            image = File.createTempFile(name,".jpg",storageDir);
-                        }catch (Exception e){e.printStackTrace();}
-                        photofile = image;
-                        if(photofile != null){
-                            pathtofile = photofile.getAbsolutePath();
-                            Uri photoURI = FileProvider.getUriForFile(MainActivity.this,"com.example.alarmclockbeta.fileprovier",photofile);
-                            camera.putExtra(MediaStore.EXTRA_OUTPUT,photoURI);
-                            startActivityForResult(camera,1);
-                        }
-                    }
-                }catch(Exception e){
-                    e.printStackTrace();
-                };
-                alarmManager.cancel(pendingIntent);
-                set_text("Alarm Off. Set Time");
-                intent.putExtra("extra", "off");
-                sendBroadcast(intent);
+                   Intent camera = new Intent();
+                   camera.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                   if(camera.resolveActivity(getPackageManager()) != null) {
+                       File photofile = null;
+                       File image = null;
+                       String name = new SimpleDateFormat("yyyMMdd_HHmmss")
+                               .format(new Date());
+                       File storageDir =
+                               getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                       try {
+                           image = File.createTempFile(name, ".jpg", storageDir);
+                       } catch (Exception e) {
+                           e.printStackTrace();
+                       }
+                       photofile = image;
+                       if (photofile != null) {
+                           pathtofile = photofile.getAbsolutePath();
+                           Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
+                                   "com.example.alarmclockbeta.fileprovier", photofile);
+                           camera.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                           startActivityForResult(camera, 1);
+                       }
+                   }
             }
         });
     }
@@ -163,8 +171,26 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                 Bitmap bitmap = BitmapFactory.decodeFile(pathtofile);
                 imageview = findViewById(R.id.imageView);
                 imageview.setImageBitmap(bitmap);
+                set_text("Processing...");
             }
         }
+    }
+
+//    AFTER RETURNING FROM THE CAMERA, GO SUBMIT PIC TO API IN CLARIFAITASK
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (pathtofile != null) {
+            new ClarifaiTask(pathtofile, updateText, alarmManager, pendingIntent, intent, MainActivity.this)
+                    .execute(new File(pathtofile));
+        }
+    }
+
+//  IF THE PICTURE MATCHES WHAT YOU WANT IT TO MATCH, TURN OFF ALARM
+    protected void onRestart(boolean yeet) {
+        alarmManager.cancel(pendingIntent);
+        intent.putExtra("extra", "off");
+        sendBroadcast(intent);
     }
 
     private void set_text(String txt){
@@ -195,4 +221,5 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {}
+
 }
