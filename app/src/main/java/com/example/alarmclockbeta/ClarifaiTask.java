@@ -27,7 +27,7 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
     PendingIntent pendingIntent;
     Intent intent;
     MainActivity mainActivity;
-    String object = "book";
+    String object = "keyboard";
 
     public ClarifaiTask(String p, TextView u, AlarmManager a, PendingIntent pi, Intent i, MainActivity m) {
         pathtofile = p;
@@ -40,9 +40,7 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
 
     protected Boolean doInBackground(File... images) {
         // Connect to Clarifai using your API token
-        // username: rishabhparekh21@gmail.com
-        // pass: pendugang123!
-        ClarifaiClient client = new ClarifaiBuilder("43eff596ac75476c84002c3883cb3ca9")
+        ClarifaiClient client = new ClarifaiBuilder("463ce488c814494da85e3968102bf90c")
                 .buildSync();
         List<ClarifaiOutput<Concept>> predictionResults = null;
         // For each photo we pass, send it off to Clarifai

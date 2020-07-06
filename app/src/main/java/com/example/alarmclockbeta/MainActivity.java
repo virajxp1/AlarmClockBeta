@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                                     hourOfDay -= 12;
                                     isAM = false;
                                 }
+                                if (hourOfDay == 12) isAM = false;
                                 if(minute<10){
                                     if (isAM) {
                                         updateText.setText("Alarm Set To " + hourOfDay + ":0" + minute + " AM");
