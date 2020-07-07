@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         intent = new Intent(this.context, AlarmReceiver.class);
 
         dropdown = (Spinner) findViewById(R.id.spinnerObjects);
-        String[] items = new String[]{"Bathroom","Computer","Keyboard","Bed"};
+        String[] items = new String[]{"Computer","Bathroom","Keyboard","Bed"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
         defaultObject = "computer";
@@ -158,8 +158,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         endAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                   Intent camera = new Intent();
-                   camera.setAction("android.media.action.IMAGE_CAPTURE");
+                   Intent camera = new Intent("android.media.action.IMAGE_CAPTURE");
                    if(camera.resolveActivity(getPackageManager()) != null) {
                        File photofile = null;
                        File image = null;
@@ -168,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                        File storageDir =
                                getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                        try {
-                           image = File.createTempFile(name, ".jpg", storageDir);
+                           image = new File(storageDir, name + ".jpg");
                        } catch (Exception e) {
                            e.printStackTrace();
                        }
