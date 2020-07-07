@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         intent = new Intent(this.context, AlarmReceiver.class);
 
         dropdown = (Spinner) findViewById(R.id.spinnerObjects);
-        String[] items = new String[]{"bathroom","computer","keyboard","bed"};
+        String[] items = new String[]{"Bathroom","Computer","Keyboard","Bed"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         dropdown.setAdapter(adapter);
         defaultObject = "computer";
