@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                     Manifest.permission.WRITE_EXTERNAL_STORAGE},2);
         }
 
-        this.context = this;
+        context = this;
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         updateText = (TextView) findViewById(R.id.textview_first);
         intent = new Intent(this.context, AlarmReceiver.class);
@@ -145,9 +145,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                                         MainActivity.this, 0,
                                         intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                                Date yeet1 = c.getTime();
-                                Date yeet2 = cur_cal.getTime();
-
                                 alarmManager.set(AlarmManager.RTC_WAKEUP, c.getTime().getTime(),
                                         pendingIntent);
                             }
@@ -157,12 +154,12 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
             }
         });
 
-        Button endAlarm = (Button) findViewById(R.id.end_alarm);
+        Button endAlarm = findViewById(R.id.end_alarm);
         endAlarm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                    Intent camera = new Intent();
-                   camera.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+                   camera.setAction("android.media.action.IMAGE_CAPTURE");
                    if(camera.resolveActivity(getPackageManager()) != null) {
                        File photofile = null;
                        File image = null;
