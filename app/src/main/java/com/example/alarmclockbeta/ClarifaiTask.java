@@ -27,15 +27,16 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
     PendingIntent pendingIntent;
     Intent intent;
     MainActivity mainActivity;
-    String object = "keyboard";
+    String object;
 
-    public ClarifaiTask(String p, TextView u, AlarmManager a, PendingIntent pi, Intent i, MainActivity m) {
+    public ClarifaiTask(String p, TextView u, AlarmManager a, PendingIntent pi, Intent i, MainActivity m,String o) {
         pathtofile = p;
         updateText = u;
         alarmManager = a;
         pendingIntent = pi;
         intent = i;
         mainActivity= m;
+        object = o;
     }
 
     protected Boolean doInBackground(File... images) {

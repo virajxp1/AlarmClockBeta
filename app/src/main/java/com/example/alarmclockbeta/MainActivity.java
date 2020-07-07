@@ -33,8 +33,11 @@ import android.view.View;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.text.format.DateFormat;
@@ -64,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     TimePickerDialog picker;
     String pathtofile;
     ImageView imageview;
+    String defaultObject;
+    Spinner dropdown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +84,12 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         updateText = (TextView) findViewById(R.id.textview_first);
         intent = new Intent(this.context, AlarmReceiver.class);
+
+        dropdown = (Spinner) findViewById(R.id.spinnerObjects);
+        String[] items = new String[]{"bathroom","computer","keyboard","bed"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        dropdown.setAdapter(adapter);
+        defaultObject = "computer";
 
         FloatingActionButton fab = findViewById(R.id.NewAlarm);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -192,7 +203,8 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     public void onResume() {
         super.onResume();
         if (pathtofile != null) {
-            new ClarifaiTask(pathtofile, updateText, alarmManager, pendingIntent, intent, MainActivity.this)
+            defaultObject = String.valueOf(dropdown.getSelectedItem());
+            new ClarifaiTask(pathtofile, updateText, alarmManager, pendingIntent, intent, MainActivity.this,defaultObject)
                     .execute(new File(pathtofile));
         }
     }
@@ -232,5 +244,4 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {}
-
 }
