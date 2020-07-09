@@ -21,7 +21,6 @@ import clarifai2.dto.prediction.Concept;
 
 public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
 
-    String pathtofile;
     TextView updateText;
     AlarmManager alarmManager;
     PendingIntent pendingIntent;
@@ -29,8 +28,8 @@ public class ClarifaiTask extends AsyncTask<File, Integer, Boolean> {
     MainActivity mainActivity;
     String object;
 
-    public ClarifaiTask(String p, TextView u, AlarmManager a, PendingIntent pi, Intent i, MainActivity m,String o) {
-        pathtofile = p;
+    public ClarifaiTask(TextView u, AlarmManager a, PendingIntent pi, Intent i, MainActivity m,
+                        String o) {
         updateText = u;
         alarmManager = a;
         pendingIntent = pi;
